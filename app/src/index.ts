@@ -3,6 +3,9 @@ import express, { Request, Response, ErrorRequestHandler } from 'express';
 const app = express();
 const PORT: number = parseInt(process.env.PORT ?? '3000', 10);
 
+// Security: Disable X-Powered-By header to avoid disclosing Express version
+app.disable('x-powered-by');
+
 // Middleware
 app.use(express.json());
 
