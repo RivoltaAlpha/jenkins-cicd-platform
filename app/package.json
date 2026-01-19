@@ -38,7 +38,7 @@
       "js"
     ],
     "testMatch": [
-      "**/tests/**/*.test.(ts|js)"
+      "**/tests/**/*.test.{ts,js}"
     ],
     "collectCoverageFrom": [
       "src/**/*.ts"
