@@ -133,8 +133,21 @@ pipeline {
                         dir('app') {
                             script {
                                 echo "🔍 Running OWASP Dependency Check..."
+                                
+                                // Try to use NVD API key if available, otherwise skip update
+                                def nvdApiKeyOption = ""
+                                try {
+                                    withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
+                                        nvdApiKeyOption = "--nvdApiKey \${NVD_API_KEY}"
+                                    }
+                                } catch (Exception e) {
+                                    echo "⚠️  NVD API key not found, using --noupdate flag (faster but may miss recent vulnerabilities)"
+                                    nvdApiKeyOption = "--noupdate"
+                                }
+                                
                                 sh """
                                     docker run --rm \
+                                        -e NVD_API_KEY=\${NVD_API_KEY:-} \
                                         -v \$(pwd):/src:rw \
                                         -v dependency_check_data:/usr/share/dependency-check/data \
                                         -u \$(id -u):\$(id -g) \
@@ -143,7 +156,8 @@ pipeline {
                                         --format HTML \
                                         --format JSON \
                                         --out /src \
-                                        --project microservice-app
+                                        --project microservice-app \
+                                        ${nvdApiKeyOption}
                                 """
                             }
                         }
@@ -294,6 +308,20 @@ pipeline {
                             }
                         }
                     }
+                }
+            }
+        }
+
+        stage('Verify Environment') {
+            steps {
+                script {
+                    sh '''
+                        echo "Registry: ${REGISTRY}"
+                        echo "Image: ${IMAGE_NAME}"
+                        echo "SonarQube: ${SONAR_HOST}"
+                        echo "Branch: ${BRANCH_NAME}"
+                        echo "Build: ${BUILD_NUMBER}"
+                    '''
                 }
             }
         }

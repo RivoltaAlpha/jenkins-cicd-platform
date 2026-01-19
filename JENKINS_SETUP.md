@@ -132,6 +132,25 @@ The init.groovy script automatically creates these credentials:
 - **Value**: Auto-generated SonarQube token
 - **Usage**: Static code analysis
 
+### 3. NVD API Key (Optional but HIGHLY Recommended)
+- **ID**: `nvd-api-key`
+- **Type**: Secret text
+- **Value**: Your NVD API key
+- **Usage**: Speeds up OWASP Dependency Check (from 30+ min to <2 min)
+
+**To get an NVD API key:**
+1. Go to https://nvd.nist.gov/developers/request-an-api-key
+2. Fill out the form and submit
+3. You'll receive an API key via email instantly
+4. Add it to Jenkins:
+   - **Manage Jenkins** → **Credentials** → **System** → **Global credentials**
+   - **Add Credentials** → **Secret text**
+   - Paste your API key
+   - ID: **nvd-api-key**
+   - Click **Create**
+
+**Without NVD API key**: The OWASP scan will use `--noupdate` flag (faster but may miss recent vulnerabilities)
+
 ### Manual Credential Update (if needed):
 1. Go to **Manage Jenkins** → **Credentials**
 2. Click **"(global)"** domain
