@@ -2,8 +2,8 @@ pipeline {
     agent any
     
     environment {
-        // Registry configuration
-        REGISTRY = 'docker-registry:5000'
+        // Registry configuration - use localhost since registry port is exposed
+        REGISTRY = 'localhost:5000'
         IMAGE_NAME = 'microservice-app'
         
         // SonarQube configuration
@@ -334,20 +334,6 @@ pipeline {
                             }
                         }
                     }
-                }
-            }
-        }
-
-        stage('Verify Environment') {
-            steps {
-                script {
-                    sh '''
-                        echo "Registry: ${REGISTRY}"
-                        echo "Image: ${IMAGE_NAME}"
-                        echo "SonarQube: ${SONAR_HOST}"
-                        echo "Branch: ${BRANCH_NAME}"
-                        echo "Build: ${BUILD_NUMBER}"
-                    '''
                 }
             }
         }
