@@ -129,6 +129,7 @@ pipeline {
         stage('Security Scanning') {
             when {
                 anyOf {
+                    branch 'master'
                     branch 'test'
                     branch 'prod'
                 }
@@ -202,6 +203,7 @@ pipeline {
                 stage('Container Security Scan') {
                     when {
                         anyOf {
+                            branch 'master'
                             branch 'test'
                             branch 'prod'
                         }
@@ -246,6 +248,7 @@ pipeline {
         stage('Build Docker Image') {
             when {
                 anyOf {
+                    branch 'master'
                     branch 'test'
                     branch 'prod'
                 }
@@ -259,7 +262,9 @@ pipeline {
                         def imageTag
                         def additionalTags = []
                         
-                        if (env.BRANCH_NAME == 'test') {
+                        if (env.BRANCH_NAME == 'master') {
+                            imageTag = "master-${env.BUILD_NUMBER}"
+                        } else if (env.BRANCH_NAME == 'test') {
                             imageTag = "test-${env.BUILD_NUMBER}"
                         } else if (env.BRANCH_NAME == 'prod') {
                             imageTag = "prod-${env.APP_VERSION}"
@@ -294,6 +299,7 @@ pipeline {
         stage('Push Docker Image') {
             when {
                 anyOf {
+                    branch 'master'
                     branch 'test'
                     branch 'prod'
                 }
@@ -338,6 +344,7 @@ pipeline {
         stage('Deployment Info') {
             when {
                 anyOf {
+                    branch 'master'
                     branch 'test'
                     branch 'prod'
                 }
