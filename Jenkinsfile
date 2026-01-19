@@ -82,7 +82,7 @@ pipeline {
                         sh """
                             sonar-scanner \
                                 -Dsonar.projectKey=microservice-app \
-                                -Dsonar.projectName='Microservice App' \
+                                -Dsonar.projectName='microservice-app' \
                                 -Dsonar.projectVersion=${env.APP_VERSION} \
                                 -Dsonar.sources=src \
                                 -Dsonar.tests=tests \
