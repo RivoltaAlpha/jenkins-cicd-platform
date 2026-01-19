@@ -78,7 +78,7 @@ pipeline {
             steps {
                 dir('app') {
                     script {
-                        echo "📊 Running SonarQube analysis..."
+                        echo "Running SonarQube analysis..."
                         
                         withSonarQubeEnv('SonarQube') {
                             withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
@@ -91,7 +91,7 @@ pipeline {
                                         -Dsonar.tests=tests \
                                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
                                         -Dsonar.host.url=${env.SONAR_HOST} \
-                                        -Dsonar.token=${SONAR_TOKEN}
+                                        -Dsonar.token=\$SONAR_TOKEN
                                 """
                             }
                         }
@@ -106,7 +106,7 @@ pipeline {
             }
             steps {
                 script {
-                    echo "🚦 Checking SonarQube Quality Gate..."
+                    echo "Checking SonarQube Quality Gate..."
                     try {
                         timeout(time: 10, unit: 'MINUTES') {
                             def qg = waitForQualityGate()
@@ -117,10 +117,7 @@ pipeline {
                             }
                         }
                     } catch (Exception e) {
-                        echo "⚠️  Quality Gate check timed out or failed: ${e.message}"
-                        echo "📊 Check results manually at: ${env.SONAR_HOST}/dashboard?id=microservice-app"
-                        // Don't fail the build on timeout for now
-                        // currentBuild.result = 'UNSTABLE'
+                        echo "Quality Gate check timed out or failed: ${e.message}"
                     }
                 }
             }
@@ -139,7 +136,7 @@ pipeline {
                     steps {
                         dir('app') {
                             script {
-                                echo "🔍 Running OWASP Dependency Check..."
+                                echo "Running OWASP Dependency Check..."
                                 
                                 // Check if NVD API key exists
                                 def hasNvdKey = false
@@ -148,14 +145,14 @@ pipeline {
                                         hasNvdKey = true
                                     }
                                 } catch (Exception e) {
-                                    echo "⚠️  NVD API key not found, using --noupdate flag (faster but may miss recent vulnerabilities)"
+                                    echo "NVD API key not found, using --noupdate flag"
                                 }
                                 
                                 if (hasNvdKey) {
                                     withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
                                         sh """
                                             docker run --rm \
-                                                -e NVD_API_KEY=\${NVD_API_KEY} \
+                                                -e NVD_API_KEY=\$NVD_API_KEY \
                                                 -v \$(pwd):/src:rw \
                                                 -v dependency_check_data:/usr/share/dependency-check/data \
                                                 -u \$(id -u):\$(id -g) \
@@ -165,7 +162,7 @@ pipeline {
                                                 --format JSON \
                                                 --out /src \
                                                 --project microservice-app \
-                                                --nvdApiKey \${NVD_API_KEY}
+                                                --nvdApiKey \$NVD_API_KEY
                                         """
                                     }
                                 } else {
@@ -210,7 +207,7 @@ pipeline {
                     }
                     steps {
                         script {
-                            echo "🛡️ Running Trivy container scan..."
+                            echo "Running Trivy container scan..."
                             
                             // Build temporary image for scanning
                             sh """
@@ -231,7 +228,7 @@ pipeline {
                             
                             // For prod, fail on vulnerabilities
                             if (env.BRANCH_NAME == 'prod' && trivyExitCode != 0) {
-                                error "❌ Critical vulnerabilities found in container image"
+                                error "Critical vulnerabilities found in container image"
                             }
                         }
                     }
