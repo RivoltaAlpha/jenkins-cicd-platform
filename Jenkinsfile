@@ -81,7 +81,6 @@ pipeline {
                         echo "📊 Running SonarQube analysis..."
                         
                         withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
-                            // Run SonarQube scanner
                             sh """
                                 sonar-scanner \
                                     -Dsonar.projectKey=microservice-app \
