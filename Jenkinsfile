@@ -52,7 +52,7 @@ pipeline {
                 dir('app') {
                     script {
                         echo "🧪 Running unit tests with coverage..."
-                        sh 'pnpm test -- --ci --testResultsProcessor=jest-junit'
+                        sh 'pnpm test -- --ci'
                     }
                 }
             }
