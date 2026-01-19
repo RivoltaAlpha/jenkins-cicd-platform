@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+coverage
+*.test.js
+tests
+.git
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+.env
+.env.local
+dependency-check-report
+trivy-report.json
+junit.xml
