@@ -8,16 +8,6 @@ pipeline {
         
         // SonarQube configuration
         SONAR_HOST = 'http://sonarqube:9000'
-        SONAR_TOKEN = credentials('sonarqube-token')
-        
-        // Docker credentials
-        REGISTRY_CREDENTIALS = credentials('docker-registry-credentials')
-        
-        // Version from package.json
-        APP_VERSION = sh(script: "cat app/package.json | grep version | head -1 | awk -F: '{ print \$2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]'", returnStdout: true).trim()
-        
-        // Build metadata
-        BUILD_TIMESTAMP = sh(script: "date +%Y%m%d-%H%M%S", returnStdout: true).trim()
     }
     
     stages {
@@ -26,7 +16,13 @@ pipeline {
                 script {
                     echo "🔄 Checking out branch: ${env.BRANCH_NAME}"
                     echo "📦 Build number: ${env.BUILD_NUMBER}"
+                    
+                    // Get version from package.json
+                    env.APP_VERSION = sh(script: "cat app/package.json | grep version | head -1 | awk -F: '{ print \$2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]'", returnStdout: true).trim()
                     echo "🏷️  Application version: ${env.APP_VERSION}"
+                    
+                    // Build timestamp
+                    env.BUILD_TIMESTAMP = sh(script: "date +%Y%m%d-%H%M%S", returnStdout: true).trim()
                 }
             }
         }
@@ -78,18 +74,20 @@ pipeline {
                     script {
                         echo "📊 Running SonarQube analysis..."
                         
-                        // Run SonarQube scanner
-                        sh """
-                            sonar-scanner \
-                                -Dsonar.projectKey=microservice-app \
-                                -Dsonar.projectName='microservice-app' \
-                                -Dsonar.projectVersion=${env.APP_VERSION} \
-                                -Dsonar.sources=src \
-                                -Dsonar.tests=tests \
-                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                                -Dsonar.host.url=${env.SONAR_HOST} \
-                                -Dsonar.token=${env.SONAR_TOKEN}
-                        """
+                        withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                            // Run SonarQube scanner
+                            sh """
+                                sonar-scanner \
+                                    -Dsonar.projectKey=microservice-app \
+                                    -Dsonar.projectName='Microservice App' \
+                                    -Dsonar.projectVersion=${env.APP_VERSION} \
+                                    -Dsonar.sources=src \
+                                    -Dsonar.tests=tests \
+                                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                    -Dsonar.host.url=${env.SONAR_HOST} \
+                                    -Dsonar.token=${SONAR_TOKEN}
+                            """
+                        }
                     }
                 }
             }
@@ -326,8 +324,12 @@ pipeline {
         always {
             script {
                 echo "🧹 Cleaning workspace..."
+                try {
+                    cleanWs()
+                } catch (Exception e) {
+                    echo "Could not clean workspace: ${e.message}"
+                }
             }
-            cleanWs()
         }
         success {
             script {
