@@ -131,6 +131,7 @@ pipeline {
                             script {
                                 echo "🔍 Running OWASP Dependency Check..."
                                 sh """
+                                    mkdir -p dependency-check-report
                                     docker run --rm \
                                         -v \$(pwd):/src \
                                         -v dependency_check_data:/usr/share/dependency-check/data \
