@@ -143,31 +143,48 @@ pipeline {
                             script {
                                 echo "🔍 Running OWASP Dependency Check..."
                                 
-                                // Try to use NVD API key if available, otherwise skip update
-                                def nvdApiKeyOption = ""
+                                // Check if NVD API key exists
+                                def hasNvdKey = false
                                 try {
                                     withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
-                                        nvdApiKeyOption = "--nvdApiKey \${NVD_API_KEY}"
+                                        hasNvdKey = true
                                     }
                                 } catch (Exception e) {
                                     echo "⚠️  NVD API key not found, using --noupdate flag (faster but may miss recent vulnerabilities)"
-                                    nvdApiKeyOption = "--noupdate"
                                 }
                                 
-                                sh """
-                                    docker run --rm \
-                                        -e NVD_API_KEY=\${NVD_API_KEY:-} \
-                                        -v \$(pwd):/src:rw \
-                                        -v dependency_check_data:/usr/share/dependency-check/data \
-                                        -u \$(id -u):\$(id -g) \
-                                        owasp/dependency-check:latest \
-                                        --scan /src \
-                                        --format HTML \
-                                        --format JSON \
-                                        --out /src \
-                                        --project microservice-app \
-                                        ${nvdApiKeyOption}
-                                """
+                                if (hasNvdKey) {
+                                    withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
+                                        sh """
+                                            docker run --rm \
+                                                -e NVD_API_KEY=\${NVD_API_KEY} \
+                                                -v \$(pwd):/src:rw \
+                                                -v dependency_check_data:/usr/share/dependency-check/data \
+                                                -u \$(id -u):\$(id -g) \
+                                                owasp/dependency-check:latest \
+                                                --scan /src \
+                                                --format HTML \
+                                                --format JSON \
+                                                --out /src \
+                                                --project microservice-app \
+                                                --nvdApiKey \${NVD_API_KEY}
+                                        """
+                                    }
+                                } else {
+                                    sh """
+                                        docker run --rm \
+                                            -v \$(pwd):/src:rw \
+                                            -v dependency_check_data:/usr/share/dependency-check/data \
+                                            -u \$(id -u):\$(id -g) \
+                                            owasp/dependency-check:latest \
+                                            --scan /src \
+                                            --format HTML \
+                                            --format JSON \
+                                            --out /src \
+                                            --project microservice-app \
+                                            --noupdate
+                                    """
+                                }
                             }
                         }
                     }
