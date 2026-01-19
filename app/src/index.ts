@@ -1,7 +1,7 @@
-import express, { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
+import express, { Request, Response, ErrorRequestHandler } from 'express';
 
 const app = express();
-const PORT: number = parseInt(process.env.PORT || '3000', 10);
+const PORT: number = parseInt(process.env.PORT ?? '3000', 10);
 
 // Middleware
 app.use(express.json());
@@ -15,8 +15,8 @@ interface AppInfo {
 
 const appInfo: AppInfo = {
   name: 'Microservice Demo',
-  version: process.env.npm_package_version || '1.0.0',
-  environment: process.env.NODE_ENV || 'development',
+  version: process.env.npm_package_version ?? '1.0.0',
+  environment: process.env.NODE_ENV ?? 'development',
 };
 
 // Track uptime
