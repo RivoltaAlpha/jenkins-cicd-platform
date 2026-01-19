@@ -6,6 +6,7 @@ blueocean:latest
 credentials-binding:latest
 sonar:latest
 prometheus:latest
+cloudbees-disk-usage-simple:latest
 cloudbees-folder:latest
 configuration-as-code:latest
 job-dsl:latest

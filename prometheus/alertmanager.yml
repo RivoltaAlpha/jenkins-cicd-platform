@@ -25,17 +25,11 @@ route:
 
 # Receivers configuration
 receivers:
-  # Default receiver - logs to console
+  # Default receiver - logs to console (no webhook)
   - name: 'default-receiver'
-    webhook_configs:
-      - url: 'http://localhost:5001/alert'
-        send_resolved: true
 
   # Critical alerts receiver
   - name: 'critical-receiver'
-    webhook_configs:
-      - url: 'http://localhost:5001/alert/critical'
-        send_resolved: true
     # Add email, Slack, PagerDuty, etc. here
     # Example Slack configuration (uncomment and configure):
     # slack_configs:
@@ -46,9 +40,6 @@ receivers:
 
   # Warning alerts receiver
   - name: 'warning-receiver'
-    webhook_configs:
-      - url: 'http://localhost:5001/alert/warning'
-        send_resolved: true
     # Example Slack configuration (uncomment and configure):
     # slack_configs:
     #   - api_url: 'YOUR_SLACK_WEBHOOK_URL'

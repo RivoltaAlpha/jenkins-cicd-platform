@@ -53,7 +53,7 @@ scrape_configs:
   # Docker Registry
   - job_name: 'registry'
     static_configs:
-      - targets: ['registry:5000']
+      - targets: ['registry:5001']
         labels:
           service: 'docker-registry'
 

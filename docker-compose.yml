@@ -40,10 +40,10 @@ services:
     container_name: docker-registry
     ports:
       - "5000:5000"
+      - "5001:5001"  # Debug/metrics port
     volumes:
       - registry_data:/var/lib/registry
-    environment:
-      - REGISTRY_STORAGE_DELETE_ENABLED=true
+      - ./registry/config.yml:/etc/docker/registry/config.yml
     networks:
       - cicd-network
     healthcheck:

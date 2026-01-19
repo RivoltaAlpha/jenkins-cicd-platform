@@ -107,7 +107,7 @@ try {
         
         // Configure Git SCM source
         def gitSource = new GitSCMSource("microservice-repo")
-        gitSource.setRemote("/var/jenkins_home/workspace/repo")
+        gitSource.setRemote("https://github.com/RivoltaAlpha/jenkins-cicd-platform.git")
         
         // Add branch source
         def branchSource = new BranchSource(gitSource)

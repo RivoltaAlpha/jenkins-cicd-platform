@@ -23,14 +23,15 @@ RUN apt-get update && \
     # Install Node.js 18
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs && \
-    # Install Trivy
-    wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | tee /usr/share/keyrings/trivy.gpg > /dev/null && \
-    echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | tee -a /etc/apt/sources.list.d/trivy.list && \
-    apt-get update && \
-    apt-get install -y trivy && \
     # Clean up
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Install Trivy (using direct binary installation to avoid repo issues)
+RUN wget -qO trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/v0.58.2/trivy_0.58.2_Linux-64bit.tar.gz && \
+    tar -zxvf trivy.tar.gz -C /usr/local/bin && \
+    chmod +x /usr/local/bin/trivy && \
+    rm trivy.tar.gz
 
 # Install SonarQube Scanner
 RUN wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip && \
