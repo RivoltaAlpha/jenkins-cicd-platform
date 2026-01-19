@@ -80,18 +80,20 @@ pipeline {
                     script {
                         echo "📊 Running SonarQube analysis..."
                         
-                        withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
-                            sh """
-                                sonar-scanner \
-                                    -Dsonar.projectKey=microservice-app \
-                                    -Dsonar.projectName='Microservice App' \
-                                    -Dsonar.projectVersion=${env.APP_VERSION} \
-                                    -Dsonar.sources=src \
-                                    -Dsonar.tests=tests \
-                                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                                    -Dsonar.host.url=${env.SONAR_HOST} \
-                                    -Dsonar.token=${SONAR_TOKEN}
-                            """
+                        withSonarQubeEnv('SonarQube') {
+                            withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                                sh """
+                                    sonar-scanner \
+                                        -Dsonar.projectKey=microservice-app \
+                                        -Dsonar.projectName='Microservice App' \
+                                        -Dsonar.projectVersion=${env.APP_VERSION} \
+                                        -Dsonar.sources=src \
+                                        -Dsonar.tests=tests \
+                                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                        -Dsonar.host.url=${env.SONAR_HOST} \
+                                        -Dsonar.token=${SONAR_TOKEN}
+                                """
+                            }
                         }
                     }
                 }
