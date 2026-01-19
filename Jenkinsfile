@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         // Registry configuration
-        REGISTRY = 'registry:5000'
+        REGISTRY = 'docker-registry:5000'
         IMAGE_NAME = 'microservice-app'
         
         // SonarQube configuration
