@@ -275,14 +275,16 @@ pipeline {
             }
             post {
                 always {
-                    // Clean up local images
-                    sh """
-                        docker rmi ${REGISTRY}/${IMAGE_NAME}:${env.IMAGE_TAG} || true
-                    """
-                    
-                    if (env.ADDITIONAL_TAGS) {
-                        env.ADDITIONAL_TAGS.split(',').each { tag ->
-                            sh "docker rmi ${REGISTRY}/${IMAGE_NAME}:${tag} || true"
+                    script {
+                        // Clean up local images
+                        sh """
+                            docker rmi ${REGISTRY}/${IMAGE_NAME}:${env.IMAGE_TAG} || true
+                        """
+                        
+                        if (env.ADDITIONAL_TAGS) {
+                            env.ADDITIONAL_TAGS.split(',').each { tag ->
+                                sh "docker rmi ${REGISTRY}/${IMAGE_NAME}:${tag} || true"
+                            }
                         }
                     }
                 }
