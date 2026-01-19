@@ -131,15 +131,15 @@ pipeline {
                             script {
                                 echo "🔍 Running OWASP Dependency Check..."
                                 sh """
-                                    mkdir -p dependency-check-report
                                     docker run --rm \
-                                        -v \$(pwd):/src \
+                                        -v \$(pwd):/src:rw \
                                         -v dependency_check_data:/usr/share/dependency-check/data \
+                                        -u \$(id -u):\$(id -g) \
                                         owasp/dependency-check:latest \
                                         --scan /src \
                                         --format HTML \
                                         --format JSON \
-                                        --out /src/dependency-check-report \
+                                        --out /src \
                                         --project microservice-app
                                 """
                             }
@@ -151,7 +151,7 @@ pipeline {
                                 allowMissing: true,
                                 alwaysLinkToLastBuild: true,
                                 keepAll: true,
-                                reportDir: 'app/dependency-check-report',
+                                reportDir: 'app',
                                 reportFiles: 'dependency-check-report.html',
                                 reportName: 'OWASP Dependency Check'
                             ])
