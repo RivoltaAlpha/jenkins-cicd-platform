@@ -123,13 +123,13 @@ for branch in "${branches[@]}"; do
     fi
 done
 
-# Return to main/master
-if git show-ref --verify --quiet refs/heads/main; then
-    git checkout main
+# Return to master/master
+if git show-ref --verify --quiet refs/heads/master; then
+    git checkout master
 elif git show-ref --verify --quiet refs/heads/master; then
     git checkout master
 else
-    git checkout -b main
+    git checkout -b master
 fi
 
 echo ""
@@ -156,7 +156,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     print_success "All branches pushed to GitHub!"
 else
     print_info "Skipped push. You can push later with:"
-    echo "  git push -u origin main"
+    echo "  git push -u origin master"
     echo "  git push -u origin develop"
     echo "  git push -u origin test"
     echo "  git push -u origin prod"
