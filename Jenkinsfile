@@ -100,7 +100,10 @@ pipeline {
         
         stage('Quality Gate') {
             when {
-                branch 'prod'
+                anyOf {
+                    branch 'test'
+                    branch 'prod'
+                }
             }
             steps {
                 script {
