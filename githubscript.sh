@@ -46,21 +46,50 @@ fi
 echo ""
 
 # Check for remote
-if git remote get-url origin > /dev/null 2>&1; then
-    current_remote=$(git remote get-url origin)
-    print_info "Current remote: $current_remote"
-    read -p "Update remote? [y/N] " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        read -p "Enter new GitHub repository URL: " repo_url
-        git remote set-url origin "$repo_url"
-        print_success "Remote updated to: $repo_url"
+if git remote | grep -q "^origin$"; then
+    current_remote=$(git remote get-url origin 2>&1)
+    if [[ "$current_remote" =~ ^(https://|git@).+ ]] && [[ ! "$current_remote" =~ (fatal|error) ]]; then
+        print_info "Current remote: $current_remote"
+        read -p "Update remote? [y/N] " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            while true; do
+                read -p "Enter new GitHub repository URL: " repo_url
+                if [ -z "$repo_url" ]; then
+                    print_error "URL cannot be empty. Please try again."
+                else
+                    git remote set-url origin "$repo_url"
+                    print_success "Remote updated to: $repo_url"
+                    break
+                fi
+            done
+        fi
+    else
+        print_error "Remote exists but URL is invalid or empty"
+        print_info "Please configure a valid GitHub repository URL"
+        while true; do
+            read -p "Enter GitHub repository URL: " repo_url
+            if [ -z "$repo_url" ]; then
+                print_error "URL cannot be empty. Please try again."
+            else
+                git remote set-url origin "$repo_url"
+                print_success "Remote updated to: $repo_url"
+                break
+            fi
+        done
     fi
 else
     print_info "No remote configured"
-    read -p "Enter GitHub repository URL (https://github.com/username/repo.git): " repo_url
-    git remote add origin "$repo_url"
-    print_success "Remote added: $repo_url"
+    while true; do
+        read -p "Enter GitHub repository URL (https://github.com/username/repo.git): " repo_url
+        if [ -z "$repo_url" ]; then
+            print_error "URL cannot be empty. Please try again."
+        else
+            git remote add origin "$repo_url"
+            print_success "Remote added: $repo_url"
+            break
+        fi
+    done
 fi
 echo ""
 
@@ -123,13 +152,13 @@ for branch in "${branches[@]}"; do
     fi
 done
 
-# Return to master/master
-if git show-ref --verify --quiet refs/heads/master; then
-    git checkout master
+# Return to main/master
+if git show-ref --verify --quiet refs/heads/main; then
+    git checkout main
 elif git show-ref --verify --quiet refs/heads/master; then
     git checkout master
 else
-    git checkout -b master
+    git checkout -b main
 fi
 
 echo ""
@@ -156,7 +185,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     print_success "All branches pushed to GitHub!"
 else
     print_info "Skipped push. You can push later with:"
-    echo "  git push -u origin master"
+    echo "  git push -u origin $(git branch --show-current)"
     echo "  git push -u origin develop"
     echo "  git push -u origin test"
     echo "  git push -u origin prod"
@@ -192,4 +221,7 @@ echo "  ngrok http 8080"
 echo "  Use ngrok URL in GitHub webhook"
 echo ""
 print_success "GitHub integration setup complete!"
+echo ""
+echo ""
+read -p "Press Enter to close..."
 echo ""
