@@ -33,8 +33,14 @@ pipeline {
                     script {
                         echo "🔨 Building application..."
                         sh '''
-                            npm ci
-                            npm run lint || true
+                            # Install pnpm if not already installed
+                            npm install -g pnpm || true
+                            
+                            # Install dependencies using pnpm
+                            pnpm install --frozen-lockfile
+                            
+                            # Run linting
+                            pnpm run lint || true
                         '''
                     }
                 }
@@ -46,7 +52,7 @@ pipeline {
                 dir('app') {
                     script {
                         echo "🧪 Running unit tests with coverage..."
-                        sh 'npm test -- --ci --testResultsProcessor=jest-junit'
+                        sh 'pnpm test -- --ci --testResultsProcessor=jest-junit'
                     }
                 }
             }

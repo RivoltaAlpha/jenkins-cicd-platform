@@ -8,7 +8,8 @@
     "start": "npx tsx --env-file=.env --watch  src/index.ts",
     "dev": "nodemon src/index.js",
     "test": "jest --coverage --detectOpenHandles",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "lint": "eslint src tests --ext .ts"
   },
   "keywords": [],
   "author": "",
