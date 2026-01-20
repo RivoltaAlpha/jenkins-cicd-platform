@@ -1,1 +1,112 @@
-GET http://localhost:8000/api
+@baseUrl = http://localhost:8000
+@testUrl = http://localhost:8000
+
+####################
+# Health Checks
+####################
+
+### Health Check - Should return 200 with status
+GET {{baseUrl}}/health
+Accept: application/json
+
+### Get Application Info
+GET {{baseUrl}}/api/info
+Accept: application/json
+
+### Get API Documentation
+GET {{baseUrl}}/
+Accept: application/json
+
+###
+
+####################
+# Calculate API
+####################
+
+### Calculate - Addition
+POST {{baseUrl}}/api/calculate
+Content-Type: application/json
+
+{
+  "operation": "add",
+  "a": 5,
+  "b": 3
+}
+
+### Calculate - Subtraction
+POST {{baseUrl}}/api/calculate
+Content-Type: application/json
+
+{
+  "operation": "subtract",
+  "a": 10,
+  "b": 4
+}
+
+### Calculate - Multiplication
+POST {{baseUrl}}/api/calculate
+Content-Type: application/json
+
+{
+  "operation": "multiply",
+  "a": 6,
+  "b": 7
+}
+
+### Calculate - Division
+POST {{baseUrl}}/api/calculate
+Content-Type: application/json
+
+{
+  "operation": "divide",
+  "a": 20,
+  "b": 4
+}
+
+### Calculate - Division by Zero (Error Case)
+POST {{baseUrl}}/api/calculate
+Content-Type: application/json
+
+{
+  "operation": "divide",
+  "a": 10,
+  "b": 0
+}
+
+### Calculate - Invalid Operation (Error Case)
+POST {{baseUrl}}/api/calculate
+Content-Type: application/json
+
+{
+  "operation": "invalid",
+  "a": 5,
+  "b": 3
+}
+
+### Calculate - Missing Parameters (Error Case)
+POST {{baseUrl}}/api/calculate
+Content-Type: application/json
+
+{
+  "operation": "add",
+  "a": 5
+}
+
+###
+
+####################
+# Error Handling
+####################
+
+### 404 - Not Found
+GET {{baseUrl}}/nonexistent
+Accept: application/json
+
+### Invalid JSON (Error Case)
+POST {{baseUrl}}/api/calculate
+Content-Type: application/json
+
+{
+  "operation": "add"
+  "a": 5,
+}
