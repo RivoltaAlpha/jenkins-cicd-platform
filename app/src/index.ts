@@ -27,7 +27,7 @@ const startTime: number = Date.now();
 
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
-  const uptime: number = (Date.now() - startTime) / 1000;
+  const uptime: number = (Date.now() - startTime) / 1000; // time in seconds 
   
   res.status(200).json({
     status: 'healthy',
@@ -128,7 +128,7 @@ app.use(errorHandler);
 // Start server only if not in test mode
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`The Server is running on port ${PORT}`);
     console.log(`Health check: http://localhost:${PORT}/health`);
   });
 }

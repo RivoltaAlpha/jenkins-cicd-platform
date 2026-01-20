@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
-  # Jenkins Master
-  jenkins:
+  # Jenkins CI/CD Server which orchestrates the CI/CD pipeline
+  jenkins: 
     build:
       context: ./jenkins
       dockerfile: Dockerfile
@@ -34,7 +32,7 @@ services:
     labels:
       - "promtail=true"
 
-  # Docker Registry
+  # Docker Registry - this is where images are stored
   registry:
     image: registry:2
     container_name: docker-registry
@@ -82,6 +80,7 @@ services:
     labels:
       - "promtail=true"
 
+  # PostgreSQL Database for SonarQube to store analysis data which is required for SonarQube to function
   sonarqube-db:
     image: postgres:13
     container_name: sonarqube-db
@@ -207,17 +206,17 @@ services:
       - loki
 
   # Node Exporter for System Metrics
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: node-exporter
-    ports:
-      - "9100:9100"
-    command:
-      - '--path.rootfs=/host'
-    volumes:
-      - /:/host:ro,rslave
-    networks:
-      - cicd-network
+  # node-exporter:
+  #   image: prom/node-exporter:latest
+  #   container_name: node-exporter
+  #   ports:
+  #     - "9100:9100"
+  #   command:
+  #     - '--path.rootfs=/host'
+  #   volumes:
+  #     - /:/host:ro,rslave
+  #   networks:
+  #     - cicd-network
 
   # cAdvisor for Container Metrics
   cadvisor:

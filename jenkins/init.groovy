@@ -13,6 +13,16 @@ import jenkins.branch.BranchSource
 import jenkins.plugins.git.GitSCMSource
 import hudson.util.Secret
 
+// The purpose of this file is to auto-configure Jenkins on first startup it is run.
+// This eliminates the need for manual configuration via the web UI.
+//  Auto-creates admin user (admin/admin123)
+//  Auto-configures security
+//  Auto-creates credentials (Docker registry + SonarQube)
+//  Auto-configures SonarQube server
+//  Auto-creates multibranch pipeline job
+//  Disables setup wizard
+//  Works end-to-end with docker-compose up 
+
 def instance = Jenkins.getInstance()
 
 println("=== Starting Jenkins Auto-Configuration ===")
