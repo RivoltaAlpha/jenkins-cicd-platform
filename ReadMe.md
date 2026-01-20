@@ -1,16 +1,16 @@
 # Jenkins CI/CD Pipeline Setup Guide
 
-## 📋 Overview
+## Overview
 This guide walks you through setting up a complete Jenkins Multibranch Pipeline with branch-specific build rules, security scanning, and container registry integration.
 
-## 🎯 Pipeline Requirements
+## Pipeline Requirements
 
 ### Branch-Specific Rules
 - **develop**: Build + Test + Static Analysis (no registry push)
 - **test**: Build + Test + Static Analysis + Security Scans + Push to Registry
 - **prod**: Build + Test + Static Analysis + Security Scans + Push with Release Tags
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Step 1: Start the Infrastructure
 ```bash
@@ -58,9 +58,8 @@ git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
 git push -u origin master develop test prod
 ```
 
-### Step 5: Create Jenkins Multibranch Pipeline
+### Step 5: Create Jenkins Multibranch Pipeline Via Jenkins UI 
 
-#### Option A: Via Jenkins UI (Recommended)
 1. Click **"New Item"** in Jenkins
 2. Enter name: `microservice-pipeline`
 3. Select **"Multibranch Pipeline"**
@@ -84,38 +83,7 @@ git push -u origin master develop test prod
 
 9. Click **"Scan Repository Now"** to discover branches
 
-#### Option B: Via Jenkins Script Console
-1. Go to **Manage Jenkins** → **Script Console**
-2. Run this script:
-
-```groovy
-import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
-import jenkins.branch.BranchSource
-import jenkins.plugins.git.GitSCMSource
-
-def jenkins = Jenkins.instance
-def jobName = "microservice-pipeline"
-
-// Create multibranch job
-def multibranchJob = jenkins.createProject(WorkflowMultiBranchProject.class, jobName)
-
-// Configure Git source
-def gitSource = new GitSCMSource("git-repo")
-gitSource.setRemote("https://github.com/YOUR_USERNAME/YOUR_REPO.git")
-
-// Add branch source
-multibranchJob.getSourcesList().add(new BranchSource(gitSource))
-
-// Save
-multibranchJob.save()
-
-// Trigger scan
-multibranchJob.scheduleBuild(0)
-
-println("✓ Multibranch pipeline created!")
-```
-
-## 🔐 Credentials Setup
+## Credentials Setup
 
 The init.groovy script automatically creates these credentials:
 
@@ -159,25 +127,25 @@ The init.groovy script automatically creates these credentials:
 5. Enter new values
 6. Click **"Save"**
 
-## 📊 Understanding the Pipeline
+## Understanding the Pipeline
 
 ### Pipeline Stages Overview
 
-```
+``` bash
 ┌─────────────┐
-│  Checkout   │  All Branches
+│ Push Code   │  Any Branch
 └──────┬──────┘
        │
 ┌──────▼──────┐
-│    Build    │  All Branches
+│    Build    │  All Branches will do this
 └──────┬──────┘
        │
 ┌──────▼──────┐
-│  Run Tests  │  All Branches
+│  Run Tests  │  All Branches will do this
 └──────┬──────┘
        │
 ┌──────▼──────────┐
-│ Static Analysis │  All Branches
+│ Static Analysis │  All Branches will do this
 └──────┬──────────┘
        │
        ├─── develop: STOP HERE ───┐
@@ -210,6 +178,7 @@ The init.groovy script automatically creates these credentials:
 ### Branch-Specific Behavior
 
 #### Develop Branch
+
 ```bash
 ✓ Checkout
 ✓ Build Application
@@ -221,6 +190,7 @@ The init.groovy script automatically creates these credentials:
 ```
 
 #### Test Branch
+
 ```bash
 ✓ Checkout
 ✓ Build Application
@@ -232,6 +202,7 @@ The init.groovy script automatically creates these credentials:
 ```
 
 #### Prod Branch
+
 ```bash
 ✓ Checkout
 ✓ Build Application
@@ -246,11 +217,12 @@ The init.groovy script automatically creates these credentials:
 ## 🧪 Testing the Pipeline
 
 ### Test Develop Branch
+
 ```bash
 git checkout develop
 
 # Make a change
-echo "// Development change" >> app/src/index.ts
+>> app/src/index.ts
 
 git add .
 git commit -m "test: develop branch pipeline"
@@ -260,6 +232,7 @@ git push origin develop
 **Expected**: Build, test, and static analysis only. No image push.
 
 ### Test Test Branch
+
 ```bash
 git checkout test
 git merge develop
@@ -270,6 +243,7 @@ git push origin test
 **Expected**: Full pipeline with security scans and registry push with tag `test-{BUILD_NUMBER}`
 
 ### Test Prod Branch
+
 ```bash
 git checkout prod
 
@@ -288,26 +262,31 @@ git push origin prod
 ## 🔍 Viewing Build Results
 
 ### 1. Console Output
+
 - Click on build number
 - Click **"Console Output"**
 - See real-time logs
 
 ### 2. Test Results
+
 - Click on build
 - Click **"Test Result"**
 - View JUnit test reports
 
 ### 3. Code Coverage
+
 - Click on build
 - Click **"Coverage Report"**
 - View Istanbul/NYC coverage
 
 ### 4. Security Reports
+
 - Click on build
 - Click **"OWASP Dependency Check"**
 - Download **"Trivy Report"** from artifacts
 
 ### 5. SonarQube Analysis
+
 - Open: http://localhost:9000
 - Login: `admin` / `admin`
 - View project: `microservice-app`
@@ -315,7 +294,9 @@ git push origin prod
 ## 🐳 Verifying Registry Images
 
 ### List Images in Registry
+
 ```bash
+
 # Check registry catalog
 curl http://localhost:5000/v2/_catalog
 
@@ -324,6 +305,7 @@ curl http://localhost:5000/v2/microservice-app/tags/list
 ```
 
 ### Pull and Run Image
+
 ```bash
 # Test branch image
 docker pull registry:5000/microservice-app:test-1
@@ -338,11 +320,17 @@ docker run -p 3000:3000 registry:5000/microservice-app:latest
 ## 📈 Monitoring
 
 ### Prometheus Metrics
+
 - Jenkins: http://localhost:8080/prometheus/
 - Prometheus UI: http://localhost:9090
-- Query: `jenkins_builds_total`
+- Example queries:
+  - Total builds: `default_jenkins_builds_total_build_count_total`
+  - Success rate: `default_jenkins_builds_success_build_count_total`
+  - Failed builds: `default_jenkins_builds_failed_build_count_total`
+  - Build duration: `default_jenkins_builds_duration_milliseconds_summary`
 
 ### Grafana Dashboards
+
 - URL: http://localhost:3000
 - Login: `admin` / `admin123`
 - Dashboard: "Jenkins Performance"
@@ -350,6 +338,7 @@ docker run -p 3000:3000 registry:5000/microservice-app:latest
 ## 🛠️ Troubleshooting
 
 ### Issue: Pipeline doesn't trigger
+
 **Solution**: 
 ```bash
 # Manually trigger scan
