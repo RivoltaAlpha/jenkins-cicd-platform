@@ -104,7 +104,8 @@ Open your browser and access these URLs:
 **Purpose**: Stores Docker images built by Jenkins.
 
 **Access**: http://localhost:5000  
-**API**: http://localhost:5000/v2/
+**API**: http://localhost:5000/v2/_catalog
+**Check specific image tags**: http://localhost:5000/v2/microservice-app/tags/list
 
 **What it does**:
 - Stores container images
@@ -588,6 +589,7 @@ increase(default_jenkins_builds_failed_build_count_total[24h])
 
 # Failed builds in last hour
 increase(default_jenkins_builds_failed_build_count_total[1h])
+
 ```
 
 **Option 3: Grafana Dashboard**
