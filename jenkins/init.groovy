@@ -49,6 +49,7 @@ def domain = Domain.global()
 def store = Jenkins.instance.getExtensionList('com.cloudbees.plugins.credentials.SystemCredentialsProvider')[0].getStore()
 
 // Docker Registry credentials (basic for insecure registry)
+store.getCredentials(domain).findAll { it.id == "docker-registry-credentials" }.each { store.removeCredentials(domain, it) }
 def dockerCreds = new UsernamePasswordCredentialsImpl(
     CredentialsScope.GLOBAL,
     "docker-registry-credentials",
@@ -59,12 +60,15 @@ def dockerCreds = new UsernamePasswordCredentialsImpl(
 store.addCredentials(domain, dockerCreds)
 println("✓ Docker registry credentials created")
 
-// SonarQube Token (using default admin token)
+// SonarQube Token - a real user token generated via SonarQube's own API (POST /api/user_tokens/generate).
+// This is tied to this specific SonarQube database; if its volume is ever wiped, a fresh token must be
+// generated again and this value (and the SonarInstallation below) updated to match.
+store.getCredentials(domain).findAll { it.id == "sonarqube-token" }.each { store.removeCredentials(domain, it) }
 def sonarToken = new StringCredentialsImpl(
     CredentialsScope.GLOBAL,
     "sonarqube-token",
     "SonarQube Token",
-    Secret.fromString("***REMOVED-PLACEHOLDER-TOKEN***")
+    Secret.fromString("***REMOVED-LEAKED-TOKEN-REVOKED***")
 )
 store.addCredentials(domain, sonarToken)
 println("✓ SonarQube token created")
@@ -76,7 +80,7 @@ def sonarInstallations = [
     new SonarInstallation(
         "SonarQube",
         "http://localhost:9000",
-        "***REMOVED-PLACEHOLDER-TOKEN***",
+        "***REMOVED-LEAKED-TOKEN-REVOKED***",
         null,
         null,
         null,

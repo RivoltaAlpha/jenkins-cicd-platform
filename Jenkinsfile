@@ -188,6 +188,7 @@ pipeline {
                                     withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
                                         sh """
                                             docker run --rm \
+                                                --network host \
                                                 -e NVD_API_KEY=\${NVD_API_KEY} \
                                                 -v \$(pwd):/src:rw \
                                                 -v dependency_check_data:/usr/share/dependency-check/data \
@@ -204,6 +205,7 @@ pipeline {
                                 } else {
                                     sh """
                                         docker run --rm \
+                                            --network host \
                                             -v \$(pwd):/src:rw \
                                             -v dependency_check_data:/usr/share/dependency-check/data \
                                             -u \$(id -u):\$(id -g) \
