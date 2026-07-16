@@ -1,0 +1,166 @@
+groups:
+  - name: jenkins_alerts
+    interval: 30s
+    rules:
+      # Jenkins is down
+      - alert: JenkinsDown
+        expr: up{job="jenkins"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: jenkins
+        annotations:
+          summary: "Jenkins is down"
+          description: "Jenkins has been down for more than 1 minute."
+
+      # High build failure rate
+      - alert: HighBuildFailureRate
+        expr: |
+          (
+            rate(jenkins_builds_failed_build_count_total[5m]) /
+            rate(jenkins_builds_total_build_count_total[5m])
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          component: jenkins
+        annotations:
+          summary: "High build failure rate"
+          description: "Build failure rate is above 50% for the last 5 minutes."
+
+      # Jenkins executor queue growing
+      - alert: JenkinsExecutorQueueHigh
+        expr: jenkins_executor_queue_length > 5
+        for: 5m
+        labels:
+          severity: warning
+          component: jenkins
+        annotations:
+          summary: "Jenkins executor queue is high"
+          description: "Jenkins has {{ $value }} jobs waiting in queue for more than 5 minutes."
+
+      # Jenkins low on executors
+      - alert: JenkinsLowExecutors
+        expr: |
+          (
+            jenkins_executor_count_value - jenkins_executor_in_use_value
+          ) < 1
+        for: 10m
+        labels:
+          severity: warning
+          component: jenkins
+        annotations:
+          summary: "Jenkins running low on executors"
+          description: "Less than 1 executor available for 10 minutes."
+
+  - name: system_alerts
+    interval: 30s
+    rules:
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes
+          ) / node_memory_MemTotal_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 90% for 5 minutes. Current usage: {{ $value }}%"
+
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for 5 minutes. Current usage: {{ $value }}%"
+
+      # Disk space low
+      - alert: DiskSpaceLow
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/"} /
+            node_filesystem_size_bytes{mountpoint="/"}
+          ) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "Disk space is running low"
+          description: "Less than 10% disk space available. Current available: {{ $value }}%"
+
+  - name: container_alerts
+    interval: 30s
+    rules:
+      # Container down
+      - alert: ContainerDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: warning
+          component: docker
+        annotations:
+          summary: "Container {{ $labels.job }} is down"
+          description: "Container {{ $labels.job }} has been down for more than 2 minutes."
+
+      # High container memory usage
+      - alert: ContainerHighMemory
+        expr: |
+          (
+            container_memory_usage_bytes{name!=""} /
+            container_spec_memory_limit_bytes{name!=""} * 100
+          ) > 90
+        for: 5m
+        labels:
+          severity: warning
+          component: docker
+        annotations:
+          summary: "Container {{ $labels.name }} high memory usage"
+          description: "Container {{ $labels.name }} memory usage is above 90%. Current: {{ $value }}%"
+
+      # Container restart
+      - alert: ContainerRestarting
+        expr: rate(container_restart_count{name!=""}[15m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          component: docker
+        annotations:
+          summary: "Container {{ $labels.name }} is restarting"
+          description: "Container {{ $labels.name }} has restarted {{ $value }} times in the last 15 minutes."
+
+  - name: registry_alerts
+    interval: 30s
+    rules:
+      # Registry down
+      - alert: RegistryDown
+        expr: up{job="registry"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: registry
+        annotations:
+          summary: "Docker registry is down"
+          description: "Docker registry has been down for more than 1 minute."
+
+  - name: sonarqube_alerts
+    interval: 30s
+    rules:
+      # SonarQube down
+      - alert: SonarQubeDown
+        expr: up{job="sonarqube"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          component: sonarqube
+        annotations:
+          summary: "SonarQube is down"
+          description: "SonarQube has been down for more than 2 minutes."

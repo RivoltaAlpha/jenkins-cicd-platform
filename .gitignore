@@ -1,0 +1,36 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Test coverage
+coverage/
+*.lcov
+junit.xml
+
+# Security scan reports
+trivy-report.json
+dependency-check-report/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Docker volumes (if mounted locally)
+volumes/
+
+# Temporary files
+tmp/
+*.tmp

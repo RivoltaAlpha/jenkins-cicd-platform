@@ -1,0 +1,64 @@
+global:
+  resolve_timeout: 5m
+
+# Default receiver (console output for now)
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default-receiver'
+  
+  # Route configuration for different alert types
+  routes:
+    # Critical alerts
+    - match:
+        severity: critical
+      receiver: 'critical-receiver'
+      continue: true
+    
+    # Warning alerts
+    - match:
+        severity: warning
+      receiver: 'warning-receiver'
+      continue: true
+
+# Receivers configuration
+receivers:
+  # Default receiver - logs to console (no webhook)
+  - name: 'default-receiver'
+
+  # Critical alerts receiver
+  - name: 'critical-receiver'
+    # Add email, Slack, PagerDuty, etc. here
+    # Example Slack configuration (uncomment and configure):
+    # slack_configs:
+    #   - api_url: 'YOUR_SLACK_WEBHOOK_URL'
+    #     channel: '#alerts-critical'
+    #     title: 'CRITICAL: {{ .GroupLabels.alertname }}'
+    #     text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+
+  # Warning alerts receiver
+  - name: 'warning-receiver'
+    # Example Slack configuration (uncomment and configure):
+    # slack_configs:
+    #   - api_url: 'YOUR_SLACK_WEBHOOK_URL'
+    #     channel: '#alerts-warning'
+    #     title: 'WARNING: {{ .GroupLabels.alertname }}'
+    #     text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+
+# Inhibition rules - prevent certain alerts from firing when others are active
+inhibit_rules:
+  # Inhibit warning alerts if critical alert is firing
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']
+
+  # Inhibit all alerts if Jenkins is down
+  - source_match:
+      alertname: 'JenkinsDown'
+    target_match_re:
+      alertname: 'Jenkins.*'
+    equal: ['instance']
