@@ -80,7 +80,7 @@ def sonarInstallations = [
     new SonarInstallation(
         "SonarQube",
         "http://localhost:9000",
-        "***REMOVED-LEAKED-TOKEN-REVOKED***",
+        "sonarqube-token",
         null,
         null,
         null,
