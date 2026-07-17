@@ -60,17 +60,24 @@ def dockerCreds = new UsernamePasswordCredentialsImpl(
 store.addCredentials(domain, dockerCreds)
 println("✓ Docker registry credentials created")
 
-// SonarQube Token - a real user token generated via SonarQube's own API (POST /api/user_tokens/generate).
-// This is tied to this specific SonarQube database; if its volume is ever wiped, a fresh token must be
-// generated again and this value (and the SonarInstallation below) updated to match.
+// SonarQube Token - read from the SONARQUBE_TOKEN environment variable (set in .env, which is
+// gitignored) rather than hardcoded here, since this file is committed to source control.
+// Generate a real user token via SonarQube's own API (POST /api/user_tokens/generate), put it in
+// .env, and restart Jenkins. If this SonarQube database is ever wiped, generate a fresh token.
 store.getCredentials(domain).findAll { it.id == "sonarqube-token" }.each { store.removeCredentials(domain, it) }
-def sonarToken = new StringCredentialsImpl(
-    CredentialsScope.GLOBAL,
-    "sonarqube-token",
-    "SonarQube Token",
-    Secret.fromString("***REMOVED-LEAKED-TOKEN-REVOKED***")
-)
-store.addCredentials(domain, sonarToken)
+def sonarTokenValue = System.getenv("SONARQUBE_TOKEN")
+if (sonarTokenValue) {
+    def sonarToken = new StringCredentialsImpl(
+        CredentialsScope.GLOBAL,
+        "sonarqube-token",
+        "SonarQube Token",
+        Secret.fromString(sonarTokenValue)
+    )
+    store.addCredentials(domain, sonarToken)
+    println("✓ SonarQube token created from SONARQUBE_TOKEN env var")
+} else {
+    println("⚠ SONARQUBE_TOKEN env var not set - skipping sonarqube-token credential creation")
+}
 println("✓ SonarQube token created")
 
 // 3. Configure SonarQube Server

@@ -1,5 +1,4 @@
 services:
-  # Jenkins CI/CD Server which orchestrates the CI/CD pipeline
   jenkins:
     build:
       context: ./jenkins
@@ -17,6 +16,7 @@ services:
       - JENKINS_OPTS=--prefix=/
       - JAVA_OPTS=-Djenkins.install.runSetupWizard=false -Xmx2g
       - DOCKER_HOST=unix:///var/run/docker.sock
+      - SONARQUBE_TOKEN=${SONARQUBE_TOKEN:-}
     depends_on:
       - sonarqube
       - registry
